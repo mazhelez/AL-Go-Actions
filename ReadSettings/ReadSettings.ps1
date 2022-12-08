@@ -175,14 +175,16 @@ try {
             $buildProjects += @(".")
         }
 
-        $buildModes = @{}
+        $buildModes = @()
         $buildProjects | % {
             $bproject = $_
             $alGoFolders = gci -Path (Join-Path $ENV:GITHUB_WORKSPACE $bproject) -Filter ".AL-Go.*" -Directory
-            $modes = $alGoFolders | where { $_.Name -ne '.AL-Go'} | % { $_.Name -replace ".AL-Go.",""}
+            $modes = $alGoFolders | where { $_.Name -ne '.AL-Go'} | % { "$bproject : $($_.Name -replace '.AL-Go.','')"}
 
-            $buildModes[$bproject] = $modes
+            $buildModes += $modes
         }
+
+        $buildProjects += @($buildModes)
 
         if ($buildProjects.Count -eq 1) {
             $projectsJSon = "[$($buildProjects | ConvertTo-Json -compress)]"
@@ -195,10 +197,6 @@ try {
         Add-Content -Path $env:GITHUB_OUTPUT -Value "ProjectsJson=$projectsJson"
         Add-Content -Path $env:GITHUB_ENV -Value "Projects=$projectsJson"
         Write-Host "ProjectsJson=$projectsJson"
-
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "BuildModesJson=$buildModesJson"
-        Add-Content -Path $env:GITHUB_ENV -Value "BuildModesJson=$buildModesJson"
-        Write-Host "BuildModesJson=$buildModesJson"
 
         Add-Content -Path $env:GITHUB_OUTPUT -Value "ProjectCount=$($buildProjects.Count)"
         Write-Host "ProjectCount=$($buildProjects.Count)"
