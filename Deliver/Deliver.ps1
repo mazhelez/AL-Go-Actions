@@ -167,21 +167,33 @@ try {
             if ($appsFolder.Count -eq 0) {
                 throw "Internal error - unable to locate apps folder"
             }
-
-            $parameters.appsfolder = $appsfolder.FullName
-            
+            if ($appsFolder.Count -gt 1) {
+                $appsFolder | Out-Host
+                throw "Internal error - multiple apps folders located"
+            }
+            $parameters.appsfolder = $appsfolder[0].FullName
             $testAppsFolder = @(Get-ChildItem -Path (Join-Path $baseFolder "*-$refname-TestApps-*.*.*.*") -Directory)
-
-            if ($testAppsFolder.Count -ne 0) {
-                $parameters.testAppsFolder = $testAppsFolder.FullName
+            if ($testAppsFolder.Count -gt 1) {
+                $testAppsFolder | Out-Host
+                throw "Internal error - multiple testApps folders located"
             }
-
+            elseif ($testAppsFolder.Count -eq 1) {
+                $parameters.testAppsFolder = $testAppsFolder[0]
+            }
+            else {
+                $parameters.testAppsFolder = ""
+            }
             $dependenciesFolder = @(Get-ChildItem -Path (Join-Path $baseFolder "*-$refname-Dependencies-*.*.*.*") -Directory)
-            
-            if ($dependenciesFolder.Count -ne 0) {
-                $parameters.dependenciesFolder = $dependenciesFolder.FullName
+            if ($dependenciesFolder.Count -gt 1) {
+                $dependenciesFolder | Out-Host
+                throw "Internal error - multiple dependencies folders located"
             }
-
+            elseif ($dependenciesFolder.Count -eq 1) {
+                $parameters.dependenciesFolder = $dependenciesFolder[0]
+            }
+            else {
+                $parameters.dependenciesFolder = ""
+            }
             . $customScript -parameters $parameters
         }
         elseif ($deliveryTarget -eq "GitHubPackages") {
