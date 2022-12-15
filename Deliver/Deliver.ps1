@@ -194,8 +194,11 @@ try {
 
                 # Get the folders holding the artifacts from all build modes
                 # Build modes are identified as a prefix to the artifact folder name
-                $artifactsFolders = @(Get-ChildItem -Path (Join-Path $baseFolder "* + $($singleArtifactFilter)") -Directory)
-                $parameters[$artifactType.ToLower() + "Folders"] = $artifactsFolders.FullName
+                $artifactsFolders = @(Get-ChildItem -Path (Join-Path $baseFolder $("*" + $singleArtifactFilter)) -Directory)
+
+                if ($artifactsFolders.Count -gt 0) {
+                    $parameters[$artifactType.ToLower() + "Folders"] = $artifactsFolders.FullName
+                }
             }
             
             Write-Host "Calling custom script: $customScript with parameters: $($parameters | ConvertTo-Json)"
